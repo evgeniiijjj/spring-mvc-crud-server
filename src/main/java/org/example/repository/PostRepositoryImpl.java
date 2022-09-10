@@ -21,24 +21,28 @@ public class PostRepositoryImpl implements PostRepository {
 
   @Override
   public List<Post> all() {
-    return posts.values().stream().sorted(Comparator.comparingLong(Post::getId)).collect(Collectors.toList());
+    return posts.values().stream().filter(Post::isActive).sorted(Comparator.comparingLong(Post::getId)).collect(Collectors.toList());
   }
 
   @Override
   public Optional<Post> getById(long id) {
-    return Optional.ofNullable(posts.get(id));
+    Post result = null;
+    if (posts.get(id).isActive()) result = posts.get(id);
+    return Optional.ofNullable(result);
   }
 
   @Override
   public Post save(Post post) throws NotFoundException {
     if (post.getId() == 0) post.setId(++lastId);
-    else if (!posts.containsKey(post.getId())) throw new NotFoundException();
+    else if (!posts.containsKey(post.getId()) || posts.get(post.getId()).isRemoved()) throw new NotFoundException();
     posts.put(post.getId(), post);
     return post;
   }
 
   @Override
   public Optional<Post> removeById(long id) {
-    return Optional.ofNullable(posts.remove(id));
+    Post result = null;
+    if (posts.get(id).isActive()) result = posts.get(id).remove();
+    return Optional.ofNullable(result);
   }
 }

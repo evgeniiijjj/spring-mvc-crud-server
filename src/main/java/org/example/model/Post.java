@@ -3,6 +3,7 @@ package org.example.model;
 public class Post {
   private long id;
   private String content;
+  private transient boolean removed;
 
   public Post() {
   }
@@ -26,5 +27,18 @@ public class Post {
 
   public void setContent(String content) {
     this.content = content;
+  }
+
+  public boolean isRemoved() {
+    return removed;
+  }
+
+  public boolean isActive() {
+    return !removed;
+  }
+
+  public Post remove() {
+    removed = true;
+    return this;
   }
 }
