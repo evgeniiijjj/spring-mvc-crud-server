@@ -6,17 +6,19 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 
 @Repository
 public class PostRepositoryImpl implements PostRepository {
 
-  private long lastId;
+  private final AtomicLong lastId;
   private final Map<Long, Post> posts;
 
   public PostRepositoryImpl() {
-    posts = new ConcurrentHashMap<>();
+    this.lastId = new AtomicLong();
+    this.posts = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -33,7 +35,7 @@ public class PostRepositoryImpl implements PostRepository {
 
   @Override
   public Post save(Post post) throws NotFoundException {
-    if (post.getId() == 0) post.setId(++lastId);
+    if (post.getId() == 0) post.setId(lastId.incrementAndGet());
     else if (!posts.containsKey(post.getId()) || posts.get(post.getId()).isRemoved()) throw new NotFoundException();
     posts.put(post.getId(), post);
     return post;
